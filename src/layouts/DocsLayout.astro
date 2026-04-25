@@ -1,0 +1,736 @@
+---
+import type { CollectionEntry, MarkdownHeading } from 'astro:content'
+
+type SearchItem = {
+  title: string
+  description: string
+  href: string
+  section: string
+  headings: Array<string>
+}
+
+type NavGroup = {
+  section: string
+  pages: Array<CollectionEntry<'wiki'>>
+}
+
+type Props = {
+  page: CollectionEntry<'wiki'>
+  groups: Array<NavGroup>
+  headings: Array<MarkdownHeading>
+  search: Array<SearchItem>
+  currentHref: string
+}
+
+const { page, groups, headings, search, currentHref } = Astro.props
+const version = 'v0.1.0'
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const pageTitle = `${page.data.title} - dependencies`
+
+const hrefFor = (id: string) => (id === 'introduction' ? `${base}/` : `${base}/docs/${id}`)
+const usefulHeadings = headings.filter((heading) => heading.depth > 1 && heading.depth < 4)
+const githubUrl = 'https://github.com/Fuiste/dependencies'
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={page.data.description} />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      document.documentElement.classList.add('js')
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href={`${base}/`} aria-label="dependencies documentation home">
+        <span class="mark">d</span>
+        <span>dependencies</span>
+        <span class="version">{version}</span>
+      </a>
+      <nav class="toplinks" aria-label="Primary">
+        <a href={githubUrl}>GitHub</a>
+        <a href={`${base}/docs/api/dependency`}>API Reference</a>
+      </nav>
+      <div class="search" data-search-root>
+        <label class="sr-only" for="docs-search">Search docs</label>
+        <input
+          id="docs-search"
+          data-search-input
+          type="search"
+          placeholder="Search"
+          autocomplete="off"
+        />
+        <kbd>/</kbd>
+        <div class="search-panel" data-search-panel hidden>
+          <p class="search-empty" data-search-empty hidden>
+            No matches. Category theory remains unmoved.
+          </p>
+          <ul data-search-results></ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="mobile-nav">
+      <details>
+        <summary>Docs menu</summary>
+        <nav aria-label="Mobile documentation">
+          {
+            groups.map((group) => (
+              <section>
+                <h2>{group.section}</h2>
+                {group.pages.map((entry) => (
+                  <a
+                    href={hrefFor(entry.id)}
+                    aria-current={hrefFor(entry.id) === currentHref ? 'page' : undefined}
+                  >
+                    {entry.data.navTitle ?? entry.data.title}
+                  </a>
+                ))}
+              </section>
+            ))
+          }
+        </nav>
+      </details>
+    </div>
+
+    <div class="shell">
+      <aside class="sidebar">
+        <nav aria-label="Documentation">
+          {
+            groups.map((group) => (
+              <section class="nav-section">
+                <h2>{group.section}</h2>
+                {group.pages.map((entry) => (
+                  <a
+                    href={hrefFor(entry.id)}
+                    aria-current={hrefFor(entry.id) === currentHref ? 'page' : undefined}
+                  >
+                    {entry.data.navTitle ?? entry.data.title}
+                  </a>
+                ))}
+              </section>
+            ))
+          }
+        </nav>
+      </aside>
+
+      <main class="content">
+        <div class="crumbs">
+          <span>{page.data.section}</span>
+          <span aria-hidden="true">/</span>
+          <span>{page.data.title}</span>
+        </div>
+        <article class="prose">
+          <slot />
+        </article>
+      </main>
+
+      <aside class="toc" aria-label="On this page">
+        <h2>On This Page</h2>
+        {
+          usefulHeadings.length > 0 ? (
+            <ol>
+              {usefulHeadings.map((heading) => (
+                <li class={`depth-${heading.depth}`}>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p>No local maxima.</p>
+          )
+        }
+      </aside>
+    </div>
+
+    <script type="application/json" id="search-index" set:html={JSON.stringify(search)} />
+    <script is:inline>
+      const searchInput = document.querySelector('[data-search-input]')
+      const searchPanel = document.querySelector('[data-search-panel]')
+      const searchResults = document.querySelector('[data-search-results]')
+      const searchEmpty = document.querySelector('[data-search-empty]')
+      const searchIndexNode = document.querySelector('#search-index')
+      const searchIndex = JSON.parse(searchIndexNode?.textContent ?? '[]')
+
+      const hideSearch = () => {
+        searchPanel.hidden = true
+      }
+
+      const showResults = (query) => {
+        const normalized = query.trim().toLowerCase()
+        searchResults.replaceChildren()
+
+        if (normalized.length === 0) {
+          hideSearch()
+          return
+        }
+
+        const matches = searchIndex
+          .map((item) => {
+            const haystack = [item.title, item.description, item.section, ...item.headings]
+              .join(' ')
+              .toLowerCase()
+            return { item, hit: haystack.includes(normalized) }
+          })
+          .filter((match) => match.hit)
+          .slice(0, 8)
+
+        searchPanel.hidden = false
+        searchEmpty.hidden = matches.length !== 0
+
+        for (const { item } of matches) {
+          const result = document.createElement('li')
+          const link = document.createElement('a')
+          const title = document.createElement('strong')
+          const description = document.createElement('span')
+
+          link.href = item.href
+          title.textContent = item.title
+          description.textContent = item.description
+          link.append(title, description)
+          result.append(link)
+          searchResults.append(result)
+        }
+      }
+
+      searchInput?.addEventListener('input', (event) => showResults(event.currentTarget.value))
+      searchInput?.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') hideSearch()
+      })
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === '/' && document.activeElement !== searchInput) {
+          event.preventDefault()
+          searchInput?.focus()
+        }
+      })
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('[data-search-root]')) hideSearch()
+      })
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8faf9;
+    --panel: #ffffff;
+    --panel-soft: #f3f7f6;
+    --text: #111827;
+    --muted: #5d6673;
+    --faint: #d9e1df;
+    --border: #d6dfdc;
+    --accent: #138981;
+    --accent-soft: #dff3f0;
+    --amber: #c47b16;
+    --amber-soft: #fff3dc;
+    --code-bg: #fbfcfc;
+    --code-border: #d9e2df;
+    --shadow: 0 18px 50px rgba(16, 24, 40, 0.08);
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111614;
+      --panel: #171d1b;
+      --panel-soft: #1e2724;
+      --text: #eff5f3;
+      --muted: #a4b0ac;
+      --faint: #2a3632;
+      --border: #34423e;
+      --accent: #44c2b4;
+      --accent-soft: #143632;
+      --amber: #f0af4f;
+      --amber-soft: #352514;
+      --code-bg: #101513;
+      --code-border: #31403b;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--bg);
+    color: var(--text);
+    scroll-padding-top: 88px;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto minmax(220px, 360px);
+    gap: 20px;
+    align-items: center;
+    height: 72px;
+    padding: 0 28px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 760;
+    font-size: 21px;
+    letter-spacing: 0;
+  }
+
+  .mark {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    color: white;
+    background: #111827;
+    font-size: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .mark {
+      color: #111827;
+      background: #eff5f3;
+    }
+  }
+
+  .version {
+    padding: 1px 7px;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+    border-radius: 8px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .toplinks {
+    display: flex;
+    gap: 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .search {
+    position: relative;
+  }
+
+  .search input {
+    width: 100%;
+    height: 38px;
+    padding: 0 44px 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    background: var(--panel);
+    font: inherit;
+  }
+
+  .search kbd {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    min-width: 22px;
+    height: 22px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--muted);
+    background: var(--panel-soft);
+    text-align: center;
+    font:
+      12px/20px ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+  }
+
+  .search-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(460px, calc(100vw - 32px));
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+  }
+
+  .search-panel ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .search-panel a {
+    display: grid;
+    gap: 2px;
+    padding: 9px 10px;
+    border-radius: 7px;
+  }
+
+  .search-panel a:hover {
+    color: var(--text);
+    background: var(--panel-soft);
+  }
+
+  .search-panel span,
+  .search-empty {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .search-empty {
+    margin: 8px 10px;
+  }
+
+  .mobile-nav {
+    display: none;
+    padding: 12px 16px 0;
+  }
+
+  .mobile-nav details {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+  }
+
+  .mobile-nav summary {
+    cursor: pointer;
+    padding: 10px 12px;
+    font-weight: 700;
+  }
+
+  .mobile-nav nav {
+    display: grid;
+    gap: 14px;
+    padding: 0 12px 14px;
+  }
+
+  .mobile-nav h2,
+  .nav-section h2,
+  .toc h2 {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 730;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .mobile-nav a,
+  .sidebar a {
+    display: block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+
+  .mobile-nav a[aria-current='page'],
+  .sidebar a[aria-current='page'] {
+    color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 880px) 250px;
+    gap: 44px;
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 34px 28px 64px;
+  }
+
+  .sidebar,
+  .toc {
+    position: sticky;
+    top: 104px;
+    align-self: start;
+    max-height: calc(100vh - 124px);
+    overflow: auto;
+  }
+
+  .sidebar {
+    padding-right: 12px;
+    border-right: 1px solid var(--border);
+  }
+
+  .nav-section + .nav-section {
+    margin-top: 24px;
+  }
+
+  .toc {
+    padding-left: 20px;
+    border-left: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .toc ol {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .toc .depth-3 {
+    padding-left: 14px;
+  }
+
+  .toc a {
+    display: block;
+    line-height: 1.35;
+  }
+
+  .content {
+    min-width: 0;
+  }
+
+  .crumbs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .prose {
+    max-width: 850px;
+  }
+
+  .prose h1 {
+    margin: 0 0 10px;
+    font-size: clamp(34px, 6vw, 52px);
+    line-height: 1.05;
+    letter-spacing: 0;
+  }
+
+  .prose h2 {
+    margin: 42px 0 12px;
+    padding-top: 4px;
+    font-size: 25px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  .prose h3 {
+    margin: 28px 0 8px;
+    font-size: 18px;
+    line-height: 1.25;
+  }
+
+  .prose p,
+  .prose li {
+    color: var(--muted);
+  }
+
+  .prose > p:first-of-type {
+    max-width: 720px;
+    color: var(--text);
+    font-size: 17px;
+  }
+
+  .prose a {
+    color: var(--accent);
+    font-weight: 650;
+  }
+
+  .prose code {
+    border: 1px solid var(--code-border);
+    border-radius: 5px;
+    padding: 0.08em 0.28em;
+    background: var(--code-bg);
+    color: var(--text);
+    font-size: 0.92em;
+  }
+
+  .prose pre {
+    margin: 18px 0;
+    padding: 18px;
+    overflow-x: auto;
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    background: var(--code-bg);
+  }
+
+  .prose pre code {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  .prose table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+
+  .prose th,
+  .prose td {
+    border: 1px solid var(--border);
+    padding: 9px 11px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .prose th {
+    background: var(--panel-soft);
+    color: var(--text);
+  }
+
+  .prose blockquote,
+  .callout {
+    margin: 20px 0;
+    border: 1px solid color-mix(in srgb, var(--amber) 55%, var(--border));
+    border-left: 4px solid var(--amber);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--amber-soft);
+  }
+
+  .prose blockquote p,
+  .callout p {
+    margin: 0;
+    color: var(--text);
+  }
+
+  .api-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+  }
+
+  .api-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--panel);
+  }
+
+  .api-card strong {
+    display: block;
+    margin-bottom: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 13px;
+  }
+
+  .api-card p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  @media (max-width: 1120px) {
+    .topbar {
+      grid-template-columns: 1fr auto;
+    }
+
+    .toplinks {
+      display: none;
+    }
+
+    .shell {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 30px;
+    }
+
+    .toc {
+      display: none;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .topbar {
+      grid-template-columns: 1fr;
+      height: auto;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .brand {
+      font-size: 19px;
+    }
+
+    .mobile-nav {
+      display: block;
+    }
+
+    .shell {
+      display: block;
+      padding: 24px 16px 48px;
+    }
+
+    .sidebar {
+      display: none;
+    }
+
+    .prose h1 {
+      font-size: 36px;
+    }
+  }
+</style>

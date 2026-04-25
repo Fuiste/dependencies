@@ -1,0 +1,36 @@
+---
+import { getCollection, render } from 'astro:content'
+import DocsLayout from '../layouts/DocsLayout.astro'
+
+const pages = await getCollection('wiki')
+const page = pages.find((entry) => entry.id === 'introduction')
+
+if (!page) {
+  throw new Error('Missing introduction wiki page')
+}
+
+const sorted = pages.sort((a, b) => a.data.order - b.data.order)
+const groups = ['Guides', 'Concepts', 'API', 'Recipes'].map((section) => ({
+  section,
+  pages: sorted.filter((entry) => entry.data.section === section),
+}))
+const { Content, headings } = await render(page)
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const currentHref = `${base}/`
+const search = await Promise.all(
+  sorted.map(async (entry) => {
+    const rendered = await render(entry)
+    return {
+      title: entry.data.title,
+      description: entry.data.description,
+      section: entry.data.section,
+      href: entry.id === 'introduction' ? `${base}/` : `${base}/docs/${entry.id}`,
+      headings: rendered.headings.map((heading) => heading.text),
+    }
+  }),
+)
+---
+
+<DocsLayout {page} {groups} {headings} {search} {currentHref}>
+  <Content />
+</DocsLayout>

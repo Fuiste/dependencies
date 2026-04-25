@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from 'astro:content'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+
+export async function getStaticPaths() {
+  const pages = await getCollection('wiki')
+
+  return pages
+    .filter((entry) => entry.id !== 'introduction')
+    .map((entry) => ({
+      params: { slug: entry.id },
+      props: { page: entry, pages },
+    }))
+}
+
+const { page, pages } = Astro.props
+const sorted = pages.sort((a, b) => a.data.order - b.data.order)
+const groups = ['Guides', 'Concepts', 'API', 'Recipes'].map((section) => ({
+  section,
+  pages: sorted.filter((entry) => entry.data.section === section),
+}))
+const { Content, headings } = await render(page)
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const currentHref = `${base}/docs/${page.id}`
+const search = await Promise.all(
+  sorted.map(async (entry) => {
+    const rendered = await render(entry)
+    return {
+      title: entry.data.title,
+      description: entry.data.description,
+      section: entry.data.section,
+      href: entry.id === 'introduction' ? `${base}/` : `${base}/docs/${entry.id}`,
+      headings: rendered.headings.map((heading) => heading.text),
+    }
+  }),
+)
+---
+
+<DocsLayout {page} {groups} {headings} {search} {currentHref}>
+  <Content />
+</DocsLayout>
