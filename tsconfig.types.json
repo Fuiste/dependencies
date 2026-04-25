@@ -3,6 +3,14 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src", "test/types.check.ts"],
-  "exclude": ["dist", "node_modules"]
+  "include": [
+    "src/context.ts",
+    "src/dependency.ts",
+    "src/errors.ts",
+    "src/index.ts",
+    "src/result.ts",
+    "src/scope.ts",
+    "test/types.check.ts"
+  ],
+  "exclude": ["dist", "node_modules", "src/content/**", "src/pages/**", "src/layouts/**"]
 }

@@ -5,7 +5,7 @@ import unusedImports from 'eslint-plugin-unused-imports'
 import prettier from 'eslint-config-prettier'
 
 export default [
-  { ignores: ['dist/**', 'node_modules/**', 'coverage/**'] },
+  { ignores: ['dist/**', 'node_modules/**', 'coverage/**', '.astro/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
