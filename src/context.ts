@@ -1,4 +1,6 @@
-export const TagTypeId: unique symbol = Symbol.for('@fuiste/dependencies/Tag') as typeof TagTypeId
+export const TagTypeId: unique symbol = Symbol.for(
+  '@fuiste/dependencies/Tag',
+) as typeof TagTypeId
 
 export type TagTypeId = typeof TagTypeId
 
@@ -18,7 +20,9 @@ export declare namespace Tag {
 
 const tagRegistry = new Map<string, Tag.Any>()
 
-export function Tag<Service, Key extends string = string>(key: Key): Tag<Key, Service> {
+export function Tag<Service, Key extends string = string>(
+  key: Key,
+): Tag<Key, Service> {
   const existing = tagRegistry.get(key)
 
   if (existing) {
@@ -35,7 +39,9 @@ export function Tag<Service, Key extends string = string>(key: Key): Tag<Key, Se
   return tag
 }
 
-export const ContextTypeId: unique symbol = Symbol.for('@fuiste/dependencies/Context') as typeof ContextTypeId
+export const ContextTypeId: unique symbol = Symbol.for(
+  '@fuiste/dependencies/Context',
+) as typeof ContextTypeId
 
 export type ContextTypeId = typeof ContextTypeId
 
@@ -74,13 +80,16 @@ export class DuplicateServiceDefinitionError extends Error {
   }
 }
 
-const makeContext = <Services extends Tag.Any>(unsafeMap: ReadonlyMap<symbol, ContextEntry>): Context<Services> =>
+const makeContext = <Services extends Tag.Any>(
+  unsafeMap: ReadonlyMap<symbol, ContextEntry>,
+): Context<Services> =>
   ({
     [ContextTypeId]: ContextTypeId,
     unsafeMap,
   }) as Context<Services>
 
-export const isTag = (value: unknown): value is Tag.Any => typeof value === 'object' && value !== null && TagTypeId in value
+export const isTag = (value: unknown): value is Tag.Any =>
+  typeof value === 'object' && value !== null && TagTypeId in value
 
 export const isContext = (value: unknown): value is Context<never> =>
   typeof value === 'object' && value !== null && ContextTypeId in value
@@ -90,16 +99,25 @@ export const empty = (): Context<never> => makeContext(new Map())
 export const entries = (context: Context<any>): ReadonlyArray<ContextEntry> =>
   Array.from(context.unsafeMap.values())
 
-export const tags = <Services extends Tag.Any>(context: Context<Services>): ReadonlyArray<Services> =>
+export const tags = <Services extends Tag.Any>(
+  context: Context<Services>,
+): ReadonlyArray<Services> =>
   entries(context).map((entry) => entry.tag as Services)
 
-export const of = <TTag extends Tag.Any>(tag: TTag, service: Context.Service<TTag>): Context<TTag> =>
-  makeContext(new Map([[tag.id, { tag, service }]]))
+export const of = <TTag extends Tag.Any>(
+  tag: TTag,
+  service: Context.Service<TTag>,
+): Context<TTag> => makeContext(new Map([[tag.id, { tag, service }]]))
 
-export const has = <Services extends Tag.Any>(context: Context<Services>, tag: Tag.Any): boolean =>
-  context.unsafeMap.has(tag.id)
+export const has = <Services extends Tag.Any>(
+  context: Context<Services>,
+  tag: Tag.Any,
+): boolean => context.unsafeMap.has(tag.id)
 
-export const unsafeGet = <TTag extends Tag.Any>(context: Context<any>, tag: TTag): Context.Service<TTag> => {
+export const unsafeGet = <TTag extends Tag.Any>(
+  context: Context<any>,
+  tag: TTag,
+): Context.Service<TTag> => {
   const entry = context.unsafeMap.get(tag.id)
 
   if (!entry) {

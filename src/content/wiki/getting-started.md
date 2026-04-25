@@ -14,7 +14,9 @@ Start by creating tags. A tag is both a runtime key and a compile-time witness f
 import { Context, Dependency, Result, build } from '@fuiste/dependencies'
 
 const Config = Context.Tag<{ prefix: string }>('getting-started/config')
-const Logger = Context.Tag<{ log: (message: string) => string }>('getting-started/logger')
+const Logger = Context.Tag<{ log: (message: string) => string }>(
+  'getting-started/logger',
+)
 
 const config = Dependency.succeed(Config, { prefix: 'demo' })
 

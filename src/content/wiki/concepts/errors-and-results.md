@@ -34,12 +34,12 @@ Use `Result.isOk`, `Result.isErr`, `Result.map`, `Result.mapError`, and `Result.
 
 Build failures are normalized into four variants.
 
-| Variant | Meaning |
-| ------- | ------- |
-| `missing_service` | A dependency required a tag absent from the build environment. |
-| `duplicate_service` | Two built contexts tried to expose the same output tag. |
-| `circular_dependency` | The evaluator detected a cycle through memoized construction. |
-| `construction_failed` | A constructor returned `Result.err` or threw/rejected. |
+| Variant               | Meaning                                                        |
+| --------------------- | -------------------------------------------------------------- |
+| `missing_service`     | A dependency required a tag absent from the build environment. |
+| `duplicate_service`   | Two built contexts tried to expose the same output tag.        |
+| `circular_dependency` | The evaluator detected a cycle through memoized construction.  |
+| `construction_failed` | A constructor returned `Result.err` or threw/rejected.         |
 
 `construction_failed` distinguishes typed errors from defects with a `cause` field:
 

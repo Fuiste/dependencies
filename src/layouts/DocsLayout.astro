@@ -27,8 +27,11 @@ const version = 'v0.1.0'
 const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 const pageTitle = `${page.data.title} - dependencies`
 
-const hrefFor = (id: string) => (id === 'introduction' ? `${base}/` : `${base}/docs/${id}`)
-const usefulHeadings = headings.filter((heading) => heading.depth > 1 && heading.depth < 4)
+const hrefFor = (id: string) =>
+  id === 'introduction' ? `${base}/` : `${base}/docs/${id}`
+const usefulHeadings = headings.filter(
+  (heading) => heading.depth > 1 && heading.depth < 4,
+)
 const githubUrl = 'https://github.com/Fuiste/dependencies'
 ---
 
@@ -45,7 +48,11 @@ const githubUrl = 'https://github.com/Fuiste/dependencies'
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href={`${base}/`} aria-label="dependencies documentation home">
+      <a
+        class="brand"
+        href={`${base}/`}
+        aria-label="dependencies documentation home"
+      >
         <span class="mark">d</span>
         <span>dependencies</span>
         <span class="version">{version}</span>
@@ -84,7 +91,9 @@ const githubUrl = 'https://github.com/Fuiste/dependencies'
                 {group.pages.map((entry) => (
                   <a
                     href={hrefFor(entry.id)}
-                    aria-current={hrefFor(entry.id) === currentHref ? 'page' : undefined}
+                    aria-current={
+                      hrefFor(entry.id) === currentHref ? 'page' : undefined
+                    }
                   >
                     {entry.data.navTitle ?? entry.data.title}
                   </a>
@@ -106,7 +115,9 @@ const githubUrl = 'https://github.com/Fuiste/dependencies'
                 {group.pages.map((entry) => (
                   <a
                     href={hrefFor(entry.id)}
-                    aria-current={hrefFor(entry.id) === currentHref ? 'page' : undefined}
+                    aria-current={
+                      hrefFor(entry.id) === currentHref ? 'page' : undefined
+                    }
                   >
                     {entry.data.navTitle ?? entry.data.title}
                   </a>
@@ -146,7 +157,11 @@ const githubUrl = 'https://github.com/Fuiste/dependencies'
       </aside>
     </div>
 
-    <script type="application/json" id="search-index" set:html={JSON.stringify(search)} />
+    <script
+      type="application/json"
+      id="search-index"
+      set:html={JSON.stringify(search)}
+    />
     <script is:inline>
       const searchInput = document.querySelector('[data-search-input]')
       const searchPanel = document.querySelector('[data-search-panel]')
@@ -170,7 +185,12 @@ const githubUrl = 'https://github.com/Fuiste/dependencies'
 
         const matches = searchIndex
           .map((item) => {
-            const haystack = [item.title, item.description, item.section, ...item.headings]
+            const haystack = [
+              item.title,
+              item.description,
+              item.section,
+              ...item.headings,
+            ]
               .join(' ')
               .toLowerCase()
             return { item, hit: haystack.includes(normalized) }
@@ -196,7 +216,9 @@ const githubUrl = 'https://github.com/Fuiste/dependencies'
         }
       }
 
-      searchInput?.addEventListener('input', (event) => showResults(event.currentTarget.value))
+      searchInput?.addEventListener('input', (event) =>
+        showResults(event.currentTarget.value),
+      )
       searchInput?.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') hideSearch()
       })
@@ -337,7 +359,8 @@ const githubUrl = 'https://github.com/Fuiste/dependencies'
     color: white;
     background: #111827;
     font-size: 14px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -676,7 +699,8 @@ const githubUrl = 'https://github.com/Fuiste/dependencies'
   .api-card strong {
     display: block;
     margin-bottom: 6px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 13px;
   }
 

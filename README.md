@@ -56,17 +56,28 @@ if (Result.isOk(result)) {
 A realistic graph usually reads like a pipeline.
 
 ```ts
-import { Context, Dependency, Result, build, compose } from '@fuiste/dependencies'
+import {
+  Context,
+  Dependency,
+  Result,
+  build,
+  compose,
+} from '@fuiste/dependencies'
 
 const Config = Context.Tag<{ prefix: string }>('readme/compose/config')
-const Logger = Context.Tag<{ log: (message: string) => string }>('readme/compose/logger')
-const Database = Context.Tag<{ query: (sql: string) => string }>('readme/compose/database')
+const Logger = Context.Tag<{ log: (message: string) => string }>(
+  'readme/compose/logger',
+)
+const Database = Context.Tag<{ query: (sql: string) => string }>(
+  'readme/compose/database',
+)
 const App = Context.Tag<{ start: () => string }>('readme/compose/app')
 
 const config = Dependency.succeed(Config, { prefix: 'demo' })
 
 const logger = Dependency.sync(Logger, [Config], (context) => ({
-  log: (message: string) => `[${Context.get(context, Config).prefix}] ${message}`,
+  log: (message: string) =>
+    `[${Context.get(context, Config).prefix}] ${message}`,
 }))
 
 const database = Dependency.sync(Database, [Logger], (context) => ({
@@ -143,7 +154,13 @@ await use(connection, async (context) => {
 Because dependencies are plain values, testing is usually just graph substitution.
 
 ```ts
-import { Context, Dependency, Result, build, override } from '@fuiste/dependencies'
+import {
+  Context,
+  Dependency,
+  Result,
+  build,
+  override,
+} from '@fuiste/dependencies'
 
 const Repository = Context.Tag<{ source: string }>('readme/override/repository')
 const App = Context.Tag<{ source: () => string }>('readme/override/app')
@@ -167,9 +184,7 @@ if (Result.isOk(built)) {
 `build` and `use` return a small `Result` value:
 
 ```ts
-type Result<A, E> =
-  | { _tag: 'ok'; value: A }
-  | { _tag: 'err'; error: E }
+type Result<A, E> = { _tag: 'ok'; value: A } | { _tag: 'err'; error: E }
 ```
 
 Build failures use a normalized `BuildError` shape:

@@ -11,7 +11,9 @@ order: 320
 Use `override` to replace requirements or outputs with test services.
 
 ```ts
-const Repository = Context.Tag<{ find: (id: string) => Promise<string> }>('repo')
+const Repository = Context.Tag<{ find: (id: string) => Promise<string> }>(
+  'repo',
+)
 const App = Context.Tag<{ load: (id: string) => Promise<string> }>('app')
 
 const app = Dependency.sync(App, [Repository], (context) => ({

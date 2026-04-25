@@ -12,7 +12,9 @@ Keep dependency definitions near the services they construct, then compose a sma
 
 ```ts
 const Config = Context.Tag<{ databaseUrl: string }>('app/config')
-const Database = Context.Tag<{ query: (sql: string) => Promise<unknown> }>('app/database')
+const Database = Context.Tag<{ query: (sql: string) => Promise<unknown> }>(
+  'app/database',
+)
 const App = Context.Tag<{ start: () => Promise<void> }>('app')
 
 const config = Dependency.succeed(Config, {

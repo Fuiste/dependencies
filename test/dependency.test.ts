@@ -1,7 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { Context, Dependency, Result, Scope, build, compose, merge, override, provide, use } from '../src'
+import {
+  Context,
+  Dependency,
+  Result,
+  Scope,
+  build,
+  compose,
+  merge,
+  override,
+  provide,
+  use,
+} from '../src'
 
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms))
 
 describe('Dependency', () => {
   it('builds pure dependencies', async () => {
@@ -29,7 +41,9 @@ describe('Dependency', () => {
 
   it('supports compose and requirement elimination', async () => {
     const Config = Context.Tag<{ prefix: string }>('compose/config')
-    const Logger = Context.Tag<{ log: (message: string) => string }>('compose/logger')
+    const Logger = Context.Tag<{ log: (message: string) => string }>(
+      'compose/logger',
+    )
     const Message = Context.Tag<string>('compose/message')
 
     const config = Dependency.succeed(Config, { prefix: 'hello' })
@@ -37,7 +51,9 @@ describe('Dependency', () => {
       const { prefix } = Context.get(context, Config)
       return { log: (message: string) => `${prefix}:${message}` }
     })
-    const message = Dependency.sync(Message, [Logger], (context) => Context.get(context, Logger).log('world'))
+    const message = Dependency.sync(Message, [Logger], (context) =>
+      Context.get(context, Logger).log('world'),
+    )
 
     const built = await build(compose(config, compose(logger, message)))
     expect(Result.isOk(built)).toBe(true)
@@ -79,8 +95,16 @@ describe('Dependency', () => {
       return { value: 7 }
     })
 
-    const left = Dependency.sync(Left, [Shared], (context) => Context.get(context, Shared).value)
-    const right = Dependency.sync(Right, [Shared], (context) => Context.get(context, Shared).value * 2)
+    const left = Dependency.sync(
+      Left,
+      [Shared],
+      (context) => Context.get(context, Shared).value,
+    )
+    const right = Dependency.sync(
+      Right,
+      [Shared],
+      (context) => Context.get(context, Shared).value * 2,
+    )
 
     const graph = merge(provide(left, shared), provide(right, shared))
     const built = await build(graph)
@@ -137,7 +161,11 @@ describe('Dependency', () => {
     const Config = Context.Tag<{ host: string }>('error/config')
     const Logger = Context.Tag<string>('error/logger')
 
-    const logger = Dependency.sync(Logger, [Config], (context) => Context.get(context, Config).host)
+    const logger = Dependency.sync(
+      Logger,
+      [Config],
+      (context) => Context.get(context, Config).host,
+    )
     const built = await build(logger)
 
     expect(Result.isErr(built)).toBe(true)
@@ -162,7 +190,9 @@ describe('Dependency', () => {
   it('detects circular dependencies', async () => {
     const Value = Context.Tag<number>('error/cycle')
     const base = Dependency.succeed(Value, 1)
-    const loop = provide(base, Context.empty()) as ReturnType<typeof provide<typeof base, Context.Context<any>>> & {
+    const loop = provide(base, Context.empty()) as ReturnType<
+      typeof provide<typeof base, Context.Context<any>>
+    > & {
       source: any
     }
 

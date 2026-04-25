@@ -12,5 +12,11 @@
     "src/scope.ts",
     "test/types.check.ts"
   ],
-  "exclude": ["dist", "node_modules", "src/content/**", "src/pages/**", "src/layouts/**"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/content/**",
+    "src/pages/**",
+    "src/layouts/**"
+  ]
 }

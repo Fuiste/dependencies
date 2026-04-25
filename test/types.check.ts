@@ -1,7 +1,7 @@
 import { Context, Dependency, build, compose, override, provide } from '../src'
 
 type Equal<A, B> =
-  (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2)
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
     ? true
     : false
 
@@ -42,7 +42,10 @@ const _providedApp = provide(app, database)
 type ProvidedAppRequires = Dependency.Requires<typeof _providedApp>
 type _ProvidedAppRequires = Expect<Equal<ProvidedAppRequires, typeof Logger>>
 
-const _overriddenApp = override(app, Dependency.succeed(Database, { query: () => 'test' }))
+const _overriddenApp = override(
+  app,
+  Dependency.succeed(Database, { query: () => 'test' }),
+)
 type OverriddenRequires = Dependency.Requires<typeof _overriddenApp>
 type _OverriddenRequires = Expect<Equal<OverriddenRequires, never>>
 

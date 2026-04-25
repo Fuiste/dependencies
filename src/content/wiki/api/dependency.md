@@ -11,7 +11,16 @@ order: 220
 The `Dependency` namespace contains constructors and graph combinators.
 
 ```ts
-import { Context, Dependency, build, compose, merge, override, provide, use } from '@fuiste/dependencies'
+import {
+  Context,
+  Dependency,
+  build,
+  compose,
+  merge,
+  override,
+  provide,
+  use,
+} from '@fuiste/dependencies'
 ```
 
 ## Constructors

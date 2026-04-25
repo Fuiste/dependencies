@@ -22,12 +22,12 @@ const logger = Dependency.sync(Logger, () => ({
 
 Use the constructor that matches the kind of work being described.
 
-| Constructor | Use it for |
-| ----------- | ---------- |
-| `succeed` | An already constructed service. |
-| `sync` | Synchronous construction from a context. |
-| `async` | Promise-based construction from a context. |
-| `scoped` | Construction that must register a finalizer. |
+| Constructor   | Use it for                                     |
+| ------------- | ---------------------------------------------- |
+| `succeed`     | An already constructed service.                |
+| `sync`        | Synchronous construction from a context.       |
+| `async`       | Promise-based construction from a context.     |
+| `scoped`      | Construction that must register a finalizer.   |
 | `fromContext` | Turning an existing context into a dependency. |
 
 `sync`, `async`, and `scoped` can return either a raw service value or a `Result`.

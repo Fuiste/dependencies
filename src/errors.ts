@@ -33,25 +33,38 @@ export type BuildError<E> =
   | CircularDependencyError
   | ConstructionFailedError<E>
 
-export const missingService = <E = never>(tag: Context.Tag.Any, path: readonly string[]): BuildError<E> => ({
+export const missingService = <E = never>(
+  tag: Context.Tag.Any,
+  path: readonly string[],
+): BuildError<E> => ({
   _tag: 'missing_service',
   tag,
   path,
 })
 
-export const duplicateService = <E = never>(tag: Context.Tag.Any, path: readonly string[]): BuildError<E> => ({
+export const duplicateService = <E = never>(
+  tag: Context.Tag.Any,
+  path: readonly string[],
+): BuildError<E> => ({
   _tag: 'duplicate_service',
   tag,
   path,
 })
 
-export const circularDependency = <E = never>(dependency: string, path: readonly string[]): BuildError<E> => ({
+export const circularDependency = <E = never>(
+  dependency: string,
+  path: readonly string[],
+): BuildError<E> => ({
   _tag: 'circular_dependency',
   dependency,
   path,
 })
 
-export const constructionError = <E>(dependency: string, path: readonly string[], error: E): BuildError<E> => ({
+export const constructionError = <E>(
+  dependency: string,
+  path: readonly string[],
+  error: E,
+): BuildError<E> => ({
   _tag: 'construction_failed',
   dependency,
   path,

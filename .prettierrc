@@ -3,7 +3,6 @@
   "semi": false,
   "singleQuote": true,
   "trailingComma": "all",
-  "printWidth": 100,
   "overrides": [
     {
       "files": "*.astro",

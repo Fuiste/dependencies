@@ -1,4 +1,6 @@
-export const ScopeTypeId: unique symbol = Symbol.for('@fuiste/dependencies/Scope') as typeof ScopeTypeId
+export const ScopeTypeId: unique symbol = Symbol.for(
+  '@fuiste/dependencies/Scope',
+) as typeof ScopeTypeId
 
 export type ScopeTypeId = typeof ScopeTypeId
 
@@ -72,7 +74,9 @@ export const close = async (scope: Scope): Promise<void> => {
   }
 
   if (errors.length > 1) {
-    const aggregate = new Error('One or more scope finalizers failed') as Error & { errors?: unknown[] }
+    const aggregate = new Error(
+      'One or more scope finalizers failed',
+    ) as Error & { errors?: unknown[] }
     aggregate.errors = errors
     throw aggregate
   }

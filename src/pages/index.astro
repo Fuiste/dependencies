@@ -24,7 +24,8 @@ const search = await Promise.all(
       title: entry.data.title,
       description: entry.data.description,
       section: entry.data.section,
-      href: entry.id === 'introduction' ? `${base}/` : `${base}/docs/${entry.id}`,
+      href:
+        entry.id === 'introduction' ? `${base}/` : `${base}/docs/${entry.id}`,
       headings: rendered.headings.map((heading) => heading.text),
     }
   }),

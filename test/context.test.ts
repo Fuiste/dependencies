@@ -23,6 +23,8 @@ describe('Context', () => {
     const left = Context.of(Name, 'left')
     const right = Context.of(Name, 'right')
 
-    expect(() => Context.merge(left, right)).toThrow("Duplicate service for tag 'name'")
+    expect(() => Context.merge(left, right)).toThrow(
+      "Duplicate service for tag 'name'",
+    )
   })
 })
