@@ -2,6 +2,8 @@
 
 Type-safe, functional dependency composition for TypeScript.
 
+Docs: <https://fuiste.github.io/dependencies/>
+
 This library is inspired by Effect's `Layer`, but keeps the surface area small and focused around two ideas:
 
 - `Context`: an immutable collection of services addressed by typed tags.
